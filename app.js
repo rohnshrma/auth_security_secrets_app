@@ -3,7 +3,9 @@ import express from "express";
 import { config } from "dotenv";
 import connectDB from "./config/db.js";
 import User from "./models/users.js";
-import { CLIENT_RENEG_LIMIT } from "tls";
+import md5 from "md5";
+
+console.log(md5("password"));
 
 config();
 
@@ -39,7 +41,7 @@ app
 
       const newUser = new User({
         email: username,
-        password: password,
+        password: md5(password),
       });
 
       await newUser.save();
@@ -65,7 +67,7 @@ app
         return res.redirect("/register");
       }
 
-      if (existingUser.password !== password) {
+      if (existingUser.password !== md5(password)) {
         console.log("incorrect password");
         return res.redirect("/login");
       }
