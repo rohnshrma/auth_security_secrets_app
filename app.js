@@ -3,9 +3,7 @@ import express from "express";
 import { config } from "dotenv";
 import connectDB from "./config/db.js";
 import User from "./models/users.js";
-import md5 from "md5";
-
-console.log(md5("password"));
+import bcrypt from "bcryptjs";
 
 config();
 
@@ -39,9 +37,13 @@ app
         return res.redirect("/login");
       }
 
+      let hash = await bcrypt.hash(password, 10);
+
+      console.log(hash);
+
       const newUser = new User({
         email: username,
-        password: md5(password),
+        password: hash,
       });
 
       await newUser.save();
@@ -67,7 +69,9 @@ app
         return res.redirect("/register");
       }
 
-      if (existingUser.password !== md5(password)) {
+      let isMatch = await bcrypt.compare(password, existingUser.password);
+
+      if (!isMatch) {
         console.log("incorrect password");
         return res.redirect("/login");
       }
